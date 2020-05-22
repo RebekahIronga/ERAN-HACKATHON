@@ -1,0 +1,23 @@
+.login-form{
+    width:300px;
+    margin:0 auto;
+}
+
+.logo{
+    width: 100px;
+}
+.form-control{
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+
+}
+
+.btn-login{
+    background-color: darkgray;
+    width: 160px;
+}
+
+.container{
+    background-image: url(safeboda.jpg);
+}
