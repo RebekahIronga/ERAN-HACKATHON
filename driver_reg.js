@@ -60,7 +60,7 @@ $(document).ready(function () {
             nin: {
                 validators: {
                     stringLength: {
-                        20,
+                    max:20,
                     notEmpty: {
                         message: 'Please enter NIN'
                     }
@@ -70,7 +70,7 @@ $(document).ready(function () {
             station: {
                 validators: {
                     stringLength: {
-                        20,
+                        max:20,
                 
                     notEmpty:{
                         message: 'Please enter station address'
@@ -90,7 +90,7 @@ $(document).ready(function () {
 
             }
         }
-    })
+    }
         .on('success.form.bv', function (e) {
             $('#success_message').slideDown({ opacity: "show" }, "slow") 
             $('#contact_form').data('bootstrapValidator').resetForm();
@@ -109,5 +109,6 @@ $(document).ready(function () {
             $.post($form.attr('action'), $form.serialize(), function (result) {
                 console.log(result);
             }, 'json');
-        });
-});
+
+            window.location.replace("./dash/dash.html");
+        )}
