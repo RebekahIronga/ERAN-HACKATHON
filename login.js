@@ -4,23 +4,18 @@ const password = document.getElementById("password");
 const userId = document.getElementById("userId");
 
 
-const userIdValue = userId.value;
-
 // Add an event listener to the login button
 logInBtn.addEventListener("click", (e) => {
     e.preventDefault();
+    const userIdValue = userId.value;
     const passwordValue = password.value;
-    const passwordLength = password.length;
+    const passwordLength = passwordValue.length;
 
-    if (password.length < 5 ) {
-        alert("This field is required!");
+    if (passwordLength < 5 ) {
+        alert("The password must have atleast 5 characters!");
     }
     else {
-        {
-            alert("logged in successfully");
-        }
-        
-    }
+        alert("logged in successfully");  
+    } 
 
-    
 });
