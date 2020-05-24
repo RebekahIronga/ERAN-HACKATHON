@@ -15,7 +15,8 @@ logInBtn.addEventListener("click", (e) => {
         alert("The password must have atleast 5 characters!");
     }
     else {
-        alert("logged in successfully");  
+        // alert("logged in successfully"); 
+        window.location.replace("./dash/dash.html");
     } 
 
 });
