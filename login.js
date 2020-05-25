@@ -1,4 +1,21 @@
+const url ="http://localhost:8080/formDb"
+// create user
+// const createUser =(user) =>{
+//     const userData =JSON.stringify(user);
+//     fetch(url),{
+//         method: "POST",
+//         body: userData,
+//         headers:{
+//             ("Accept:application/json",
+//             "Content-Type: application/json"
+//              ) }
+//     }
+
+
+
+
 // Reference elements in the DOM
+
 const logInBtn = document.getElementById("logInBtn");
 const password = document.getElementById("password");
 const userId = document.getElementById("userId");

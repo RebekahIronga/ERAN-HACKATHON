@@ -110,5 +110,3 @@ $(document).ready(function () {
                 console.log(result);
             }, 'json');
 
-            window.location.replace("./dash/dash.html");
-        )}
