@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- DEVICE SETTINGS -->
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- TITLE & CSS CONFIGS-->
+		<title>Add Driver</title>
+		<link type="image/x-icon" rel="shortcut icon" href="#">
+		<link href="vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+		<link href="vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+		<link href="vendors/nprogress/nprogress.css" rel="stylesheet">
+		<link href="vendors/iCheck/skins/flat/green.css" rel="stylesheet">
+		<link href="vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
+		<link href="vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css" rel="stylesheet">
+		<link href="vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" rel="stylesheet">
+		<link href="vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" rel="stylesheet">
+		<link href="vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css" rel="stylesheet">
+		<link href="build/css/custom.min.css" rel="stylesheet">
+
+		<!-- JAVASCRIPT SETTINGS -->
+		<script src="vendors/jquery.min.js"></script>
+
+    <!-- JAVASCRIPT CUSTOM FUNCTIONS -->
+    <script type="text/javascript">
+
+      // ................... PAGE LOAD FUNCTION PROCESSING .............................. //
+      $( document ).ready(function() {
+          
+          // ... Validate Running Session
+          var session_status = localStorage.getItem("session_status");
+          ValidateRunningSession(session_status);       
+
+      });
+
+      // ................... AUTHORIZATION FUNCTIONS .................................... //
+      // ................... AUTHORIZATION FUNCTIONS .................................... //
+
+      // ... AUTH FUNC 01: Validate running session
+      function ValidateRunningSession(session_status) {
+        if(session_status!="active"){
+          window.location.replace('index.html');
+        }
+        else if(session_status=="active"){
+          var login_remote_url = localStorage.getItem("login_remote_url");
+          FetchCurrentUserDetails(login_remote_url);
+
+          // ... Enable Page Functions Since the session is valid
+          ExecuteAllowedFunctions();
+        }
+      }
+
+      // ... AUTH FUNC 02: FetchCurrentUserDetails
+      function FetchCurrentUserDetails(login_remote_url) {
+        $.ajax
+        ({
+          type :'GET',
+          url  :login_remote_url,
+          success:function(response) 
+          {
+            console.log(response);
+
+            // ... Handling of API responses
+            var uuid = response[0].uuid;
+            var userName = response[0].userName;
+            var password = response[0].password;
+            var fullName = response[0].fullName;
+            var phone = response[0].phone;
+            var email = response[0].email;
+            var usertype = response[0].usertype;
+            var status = response[0].status;
+
+            // ... Passing the web controls
+            $("#user_uuid").val(uuid);
+            $("#user_userName").val(userName);
+            $("#user_password").val(password);
+            $("#user_fullName").val(fullName);
+            $("#user_phone").val(phone);
+            $("#user_email").val(email);
+            $("#user_usertype").val(usertype);
+            $("#user_status").val(status);  
+
+            // ... setting the display web controls
+            $("#current_username").text(userName);  
+          }
+        });
+      }
+
+      // ... AUTH FUNC 03: ExecuteAllowedFunctions
+      function ExecuteAllowedFunctions() {
+
+        // ... list of allowed functions
+        FetchAllDriverStages();
+      }
+
+
+      // ............................. PAGE FUNCTIONS .................................... //
+      // ............................. PAGE FUNCTIONS .................................... //
+
+      // ... PAGE FUNC 01: FetchAllDriverStages
+      function FetchAllDriverStages() {
+        $('#SYS_ALERT_MSG').html("");
+
+        // ... Perform Ajax Call
+        $.ajax
+        ({
+          type :'GET',
+          url  :'http://localhost:8888/api/stages',
+          success:function(response) 
+          {
+            //console.log(response);
+            var datalist = response;
+            ProcessReturnedData(datalist);
+          }
+        });
+      }
+
+      // ... PAGE FUNC 02: ProcessReturnedData
+      function ProcessReturnedData(datalist) {
+        
+        var ROW_LIST = "";
+
+        // ... Process returned records
+        for (var i = 0; i < datalist.length; i++) {
+            var stage = datalist[i];
+
+            var uuid = stage.uuid;
+            var stageName = stage.stageName;
+            var district = stage.district;
+            var county = stage.county;
+            var subCounty = stage.subCounty;
+            var parish = stage.parish;
+            var village = stage.village;
+            var status = stage.status;
+
+            var stage_details_url = "driver-new2.html?uu="+uuid+"&ss="+stageName;
+
+            var ROW = "<tr>"
+                        + "<td>" + (i+1) + "</td>"
+                        + "<td>" + stageName + "</td>"
+                        + "<td>" + district + "</td>"
+                        + "<td>" + county + "</td>"
+                        + "<td>" + subCounty + "</td>"
+                        + "<td>" + parish + "</td>"
+                        + "<td>" + village + "</td>"
+                        + "<td><a href='"+stage_details_url+"' style='text-decoration: underline; color: blue;'>View ...</a></td>"
+                    + "</tr > ";
+
+            ROW_LIST = ROW_LIST + ROW;
+        }
+
+        // ... Empty rows and re-add them back
+        $("#datatable tbody").children().remove();
+        $('#datatable').find('tbody').append(ROW_LIST);
+
+
+      }// ...  end..function
+
+      // ... 03: Print System Message
+      function PrintSystemMessage(message_type, message_body){
+        if(message_type=="SUCCESS"){
+          $('#SYS_ALERT_MSG').html("<div class='alert alert-success alert-dismissible fade in' role='alert'>"+message_body+"</div>");
+        }
+        if(message_type=="ERROR"){
+          $('#SYS_ALERT_MSG').html("<div class='alert alert-danger alert-dismissible fade in' role='alert'>"+message_body+"</div>");
+        }
+        if(message_type=="INFO"){
+          $('#SYS_ALERT_MSG').html("<div class='alert alert-info alert-dismissible fade in' role='alert'>"+message_body+"</div>");
+        }
+        if(message_type=="WARNING"){
+          $('#SYS_ALERT_MSG').html("<div class='alert alert-danger alert-dismissible fade in' role='alert'>"+message_body+"</div>");
+        }
+      }
+
+    </script>
+	</head>
+
+  <body class="nav-md">
+
+    <!-- User Details -- -- -- -->
+    <input type="hidden" name="user_uuid" id="user_uuid">
+    <input type="hidden" name="user_userName" id="user_userName">
+    <input type="hidden" name="user_password" id="user_password">
+    <input type="hidden" name="user_fullName" id="user_fullName">
+    <input type="hidden" name="user_phone" id="user_phone">
+    <input type="hidden" name="user_email" id="user_email">
+    <input type="hidden" name="user_usertype" id="user_usertype">
+    <input type="hidden" name="user_status" id="user_status">
+
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="main-dashboard" class="site_title"> SafeBoda Recruit<span></span></a>
+            </div>
+
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+                <ul class="nav side-menu">
+                  <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+
+                  <!-- --- Recruitment  --- --- --- --- --- --- --- --- --- --- --- --- --- -->
+                  <li><a><i class="fa fa-users"></i> Driver Mgt<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="#">New Driver</a></li>
+                      <li><a href="drivers-view.html">View Drivers</a></li>
+                      <li><a href="#">Driver Reports</a></li>
+                    </ul>
+                  </li>
+
+                  <!-- --- Stages  --- --- --- --- --- --- --- --- --- --- --- --- --- -->
+                  <li><a><i class="fa fa-users"></i> Driver Stages<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="#">Add Stage</a></li>
+                      <li><a href="#">View Stages</a></li>
+                    </ul>
+                  </li>
+
+                  <!-- --- Users  --- --- --- --- --- --- --- --- --- --- --- --- --- -->
+                  <li><a><i class="fa fa-users"></i> User Mgt<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="#">Add User</a></li>
+                      <li><a href="#">View Users</a></li>
+                    </ul>
+                  </li>
+
+                  <!-- --- My P  --- --- --- --- --- --- --- --- --- --- --- --- --- -->
+                  <li><a><i class="fa fa-gear"></i> My Profile<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                        <li><a href="prof-bank-accts">Change Password</a></li>
+                    </ul>
+                  </li>
+                
+                  <li><a href="logout-cst"><i class="fa fa-sign-out"></i> Log Out</a></li>
+                </ul>
+              </div>
+            </div>
+            <!-- /sidebar menu -->
+
+
+          </div>
+        </div>
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav>
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+
+
+              <ul class="nav navbar-nav navbar-right">
+                <li class="">
+                  <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span id="current_username"></span>
+                    <span class=" fa fa-angle-down"></span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-usermenu pull-right">
+                    <li><a href="#">Change Password</a></li>
+                    <li><a href="logout-cst"><i class="fa fa-sign-out pull-right"></i> Log out</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- /top navigation -->
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="col-md-12 col-sm-12 col-xs-12">
+
+            <!-- System Message Area -->
+            <div id="SYS_ALERT_MSG" align="center" style="width: 100%;"></div>
+
+            <div class="x_panel">
+              <div class="x_title">
+                <a href="drivers-view.html" class="btn btn-sm btn-dark pull-left">Back</a>
+                <h2>STEP 01: select stage to add driver</h2>
+                <div class="clearfix"></div>
+              </div>
+
+              <!--<div class="x_content" style="overflow-y: auto; height: 490px;"> -->        
+              <div class="x_content">  
+                <table id="datatable" class="table table-striped table-bordered" style="font-size: 12px;">
+                  <thead>
+                    <tr valign="top">
+                      <th colspan="8" bgcolor="#EEE">
+                        List of Stages
+                      </th>
+                    </tr>
+                    <tr valign="top">
+                      <th width="3%">#</th>
+                      <th>Stage Name</th>
+                      <th>District</th>
+                      <th>County</th>
+                      <th>SubCounty</th>
+                      <th>Parish</th>
+                      <th>Village</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+            
+
+          </div>          
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <footer>
+          <div class="pull-right">
+            &copy; 2020 SafeBoda Recruit. Powered by Nathan
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+      </div>
+    </div>
+
+
+
+  <!-- jQuery -->
+  <script src="vendors/jquery/dist/jquery.min.js"></script>
+  <!-- Bootstrap -->
+  <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+  <!-- FastClick -->
+  <script src="vendors/fastclick/lib/fastclick.js"></script>
+  <!-- NProgress -->
+  <script src="vendors/nprogress/nprogress.js"></script>
+  <!-- iCheck -->
+  <script src="vendors/iCheck/icheck.min.js"></script>
+  <!-- Datatables -->
+  <script src="vendors/datatables.net/js/jquery.dataTables.min.js"></script>
+  <script src="vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+  <script src="vendors/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+  <script src="vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+  <script src="vendors/datatables.net-buttons/js/buttons.flash.min.js"></script>
+  <script src="vendors/datatables.net-buttons/js/buttons.html5.min.js"></script>
+  <script src="vendors/datatables.net-buttons/js/buttons.print.min.js"></script>
+  <script src="vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js"></script>
+  <script src="vendors/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+  <script src="vendors/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js"></script>
+  <script src="vendors/datatables.net-scroller/js/datatables.scroller.min.js"></script>
+  <script src="vendors/jszip/dist/jszip.min.js"></script>
+  <script src="vendors/pdfmake/build/pdfmake.min.js"></script>
+  <script src="vendors/pdfmake/build/vfs_fonts.js"></script>
+
+  <!-- Custom Theme Scripts -->
+  <script src="build/js/custom.min.js"></script>
+
+  <!-- Datatables -->
+  <script>
+    $(document).ready(function() {
+      load_js_script_definitions();
+    });
+
+    function load_js_script_definitions (){
+      var handleDataTableButtons = function() {
+        if ($("#datatable-buttons").length) {
+          $("#datatable-buttons").DataTable({
+            dom: "Bfrtip",
+            buttons: [
+              {
+                extend: "copy",
+                className: "btn-sm"
+              },
+              {
+                extend: "csv",
+                className: "btn-sm"
+              },
+              {
+                extend: "excel",
+                className: "btn-sm"
+              },
+              {
+                extend: "pdfHtml5",
+                className: "btn-sm"
+              },
+              {
+                extend: "print",
+                className: "btn-sm"
+              },
+            ],
+            responsive: true
+          });
+        }
+      };
+
+      TableManageButtons = function() {
+        "use strict";
+        return {
+          init: function() {
+            handleDataTableButtons();
+          }
+        };
+      }();
+
+      $('#datatable').dataTable();
+      $('#datatable2').dataTable();
+
+      $('#datatable-keytable').DataTable({
+        keys: true
+      });
+
+      $('#datatable-responsive').DataTable();
+
+      $('#datatable-scroller').DataTable({
+        ajax: "js/datatables/json/scroller-demo.json",
+        deferRender: true,
+        scrollY: 380,
+        scrollCollapse: true,
+        scroller: true
+      });
+
+      $('#datatable-fixed-header').DataTable({
+        fixedHeader: true
+      });
+
+      var $datatable = $('#datatable-checkbox');
+
+      $datatable.dataTable({
+        'order': [[ 1, 'asc' ]],
+        'columnDefs': [
+          { orderable: false, targets: [0] }
+        ]
+      });
+      $datatable.on('draw.dt', function() {
+        $('input').iCheck({
+          checkboxClass: 'icheckbox_flat-green'
+        });
+      });
+
+      TableManageButtons.init();
+    }
+  </script>
+  <!-- /Datatables -->  
+  
+  </body>
+</html>
